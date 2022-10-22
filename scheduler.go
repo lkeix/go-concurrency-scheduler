@@ -1,8 +1,6 @@
 package schedulre
 
 import (
-	"sync"
-
 	"github.com/lkeix/go-concurrency-scheduler/concurrency"
 	"github.com/lkeix/go-concurrency-scheduler/internal"
 )
@@ -22,30 +20,36 @@ func (s *Scheduler) Insert(child concurrency.Executor, parents ...concurrency.Ex
 }
 
 func (s *Scheduler) Do() {
-	wg := &sync.WaitGroup{}
-	walk(s.dependencyTree.Tree, wg)
-	wg.Wait()
+	walk(s.dependencyTree.Tree)
 }
 
-func walk(n *internal.Node, wg *sync.WaitGroup) {
-	for _, child := range n.Children {
-		executor := *child.Executor
-		if len(child.Children) == 0 {
-			wg.Add(1)
-			go func() {
-				executor.Exec()
-				wg.Done()
-			}()
-			continue
-		}
+func walk(n *internal.Node) {
+	for i := 0; i < len(n.Children); i++ {
+		executor := *n.Children[i].Executor
+		go func(i int) {
+			wait(n.Chans)
+			executor.Exec()
+			n.Chan <- true
+		}(i)
+		walk(n)
+	}
+}
 
-		go func(children []*internal.Node) {
-			if len(children) > 0 {
-				wg.Add(1)
-				executor.Exec()
-				wg.Done()
+func wait(chans []chan bool) {
+	if len(chans) == 0 {
+		return
+	}
+
+	ends := make([]bool, 0)
+
+	for len(ends) != len(chans) {
+		for i := 0; i < len(chans); i++ {
+			select {
+			case <-chans[i]:
+				ends = append(ends, true)
+			default:
+				continue
 			}
-			walk(n, wg)
-		}(child.Children)
+		}
 	}
 }

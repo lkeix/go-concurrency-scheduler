@@ -6,6 +6,7 @@ import (
 
 type Node struct {
 	Chan     chan bool
+	Chans    []chan bool
 	Parent   *Node
 	Executor *concurrency.Executor
 	Children []*Node
@@ -33,7 +34,7 @@ func (dt *DependenceTree) Insert(from *concurrency.Executor, tos ...*concurrency
 	child := &Node{
 		Executor: from,
 		Children: make([]*Node, 0),
-		Chan:     nil,
+		Chan:     make(chan bool),
 	}
 	dt.Place[from] = child
 
@@ -43,15 +44,16 @@ func (dt *DependenceTree) Insert(from *concurrency.Executor, tos ...*concurrency
 		return
 	}
 
-	child.Chan = make(chan bool, len(tos))
+	child.Chans = make([]chan bool, len(tos))
 
-	for _, to := range tos {
-		parent, ok := dt.Place[to]
+	for i := 0; i < len(tos); i++ {
+		parent, ok := dt.Place[tos[i]]
 		if !ok {
 			panic("parent func doesn't insert")
 		}
 
 		child.Parent = parent
+		child.Chans[i] = parent.Chan
 		parent.Children = append(parent.Children, child)
 	}
 }
