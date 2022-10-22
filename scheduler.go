@@ -1,4 +1,4 @@
-package gocs
+package schedulre
 
 import (
 	"sync"

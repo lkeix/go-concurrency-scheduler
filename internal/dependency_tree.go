@@ -1,6 +1,8 @@
 package internal
 
-import "github.com/lkeix/go-concurrency-scheduler/concurrency"
+import (
+	"github.com/lkeix/go-concurrency-scheduler/concurrency"
+)
 
 type Node struct {
 	Chan     chan bool
@@ -33,15 +35,15 @@ func (dt *DependenceTree) Insert(from *concurrency.Executor, tos ...*concurrency
 		Children: make([]*Node, 0),
 		Chan:     nil,
 	}
+	dt.Place[from] = child
 
-	if len(tos) == 0 {
+	if tos == nil {
 		child.Parent = dt.Place[dt.root]
 		dt.Place[dt.root].Children = append(dt.Place[dt.root].Children, child)
 		return
 	}
 
 	child.Chan = make(chan bool, len(tos))
-	dt.Place[from] = child
 
 	for _, to := range tos {
 		parent, ok := dt.Place[to]
