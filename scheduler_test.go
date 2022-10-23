@@ -3,6 +3,7 @@ package schedulre
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/lkeix/go-concurrency-scheduler/concurrency"
 )
@@ -18,7 +19,7 @@ func Newa1() concurrency.Executor {
 }
 
 func Newa2() concurrency.Executor {
-	return &a1{}
+	return &a2{}
 }
 
 func Newa3() concurrency.Executor {
@@ -26,27 +27,30 @@ func Newa3() concurrency.Executor {
 }
 
 func (o *a1) Exec() {
+	time.Sleep(1 * time.Second)
 	fmt.Printf("a1\n")
 }
 
 func (o *a2) Exec() {
+	time.Sleep(1 * time.Second)
 	fmt.Printf("a2\n")
 }
 
 func (o *a3) Exec() {
+	time.Sleep(1 * time.Second)
 	fmt.Printf("a3\n")
 }
 
 func (o *a1) Name() string {
-	return ""
+	return "a1"
 }
 
 func (o *a2) Name() string {
-	return ""
+	return "a2"
 }
 
 func (o *a3) Name() string {
-	return ""
+	return "a3"
 }
 
 func TestInsert(t *testing.T) {

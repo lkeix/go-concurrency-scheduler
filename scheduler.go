@@ -1,18 +1,20 @@
 package schedulre
 
 import (
-	"time"
+	"sync"
 
 	"github.com/lkeix/go-concurrency-scheduler/concurrency"
 	"github.com/lkeix/go-concurrency-scheduler/internal"
 )
 
 type Scheduler struct {
+	wg             *sync.WaitGroup
 	dependencyTree *internal.DependenceTree
 }
 
 func New() *Scheduler {
 	return &Scheduler{
+		wg:             &sync.WaitGroup{},
 		dependencyTree: internal.NewDepsTree(),
 	}
 }
@@ -22,19 +24,24 @@ func (s *Scheduler) Insert(child *concurrency.Executor, parents ...*concurrency.
 }
 
 func (s *Scheduler) Do() {
-	walk(s.dependencyTree.Tree)
+	s.wg.Add(len(s.dependencyTree.Place) - 1)
+	walk(s.dependencyTree.Tree, s.wg)
+	s.wg.Wait()
 }
 
-func walk(n *internal.Node) {
-	for i := 0; i < len(n.Children); i++ {
-		executor := *n.Children[i].Executor
-		go func(i int) {
+func walk(n *internal.Node, wg *sync.WaitGroup) {
+	if n.Executor != nil {
+		executor := *n.Executor
+		go func(wg *sync.WaitGroup) {
 			wait(n.Chans)
 			executor.Exec()
+			wg.Done()
 			n.Chan <- true
-		}(i)
-		time.Sleep(1 * time.Second)
-		walk(n.Children[i])
+		}(wg)
+	}
+
+	for i := 0; i < len(n.Children); i++ {
+		walk(n.Children[i], wg)
 	}
 }
 

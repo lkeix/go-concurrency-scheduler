@@ -36,6 +36,7 @@ func (dt *DependenceTree) Insert(from *concurrency.Executor, tos ...*concurrency
 		Children: make([]*Node, 0),
 		Chan:     make(chan bool),
 	}
+
 	dt.Place[from] = child
 
 	if tos == nil {
@@ -47,13 +48,13 @@ func (dt *DependenceTree) Insert(from *concurrency.Executor, tos ...*concurrency
 	child.Chans = make([]chan bool, len(tos))
 
 	for i := 0; i < len(tos); i++ {
-		parent, ok := dt.Place[tos[i]]
+		_, ok := dt.Place[tos[i]]
 		if !ok {
 			panic("parent func doesn't insert")
 		}
 
-		child.Parent = parent
-		child.Chans[i] = parent.Chan
-		parent.Children = append(parent.Children, child)
+		child.Parent = dt.Place[tos[i]]
+		child.Chans[i] = dt.Place[tos[i]].Chan
+		dt.Place[tos[i]].Children = append(dt.Place[tos[i]].Children, child)
 	}
 }
