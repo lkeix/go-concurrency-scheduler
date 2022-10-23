@@ -1,6 +1,8 @@
 package schedulre
 
 import (
+	"time"
+
 	"github.com/lkeix/go-concurrency-scheduler/concurrency"
 	"github.com/lkeix/go-concurrency-scheduler/internal"
 )
@@ -15,8 +17,8 @@ func New() *Scheduler {
 	}
 }
 
-func (s *Scheduler) Insert(child concurrency.Executor, parents ...concurrency.Executor) {
-	s.Insert(child, parents...)
+func (s *Scheduler) Insert(child *concurrency.Executor, parents ...*concurrency.Executor) {
+	s.dependencyTree.Insert(child, parents...)
 }
 
 func (s *Scheduler) Do() {
@@ -31,7 +33,8 @@ func walk(n *internal.Node) {
 			executor.Exec()
 			n.Chan <- true
 		}(i)
-		walk(n)
+		time.Sleep(1 * time.Second)
+		walk(n.Children[i])
 	}
 }
 

@@ -1,6 +1,8 @@
 package internal
 
 import (
+	"fmt"
+
 	"github.com/lkeix/go-concurrency-scheduler/concurrency"
 )
 
@@ -31,6 +33,7 @@ func NewDepsTree() *DependenceTree {
 }
 
 func (dt *DependenceTree) Insert(from *concurrency.Executor, tos ...*concurrency.Executor) {
+	fmt.Println(tos)
 	child := &Node{
 		Executor: from,
 		Children: make([]*Node, 0),
