@@ -50,7 +50,7 @@ func (dt *DependenceTree) Insert(from *concurrency.Executor, tos ...*concurrency
 	for i := 0; i < len(tos); i++ {
 		_, ok := dt.Place[tos[i]]
 		if !ok {
-			panic("parent func doesn't insert")
+			panic("parent func doesn't exist")
 		}
 
 		child.Parent = dt.Place[tos[i]]
