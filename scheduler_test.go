@@ -71,5 +71,6 @@ func TestDo(t *testing.T) {
 	s.Insert(&a1)
 	s.Insert(&a2, &a1)
 	s.Insert(&a3)
+	s.Insert(&a2, &a3)
 	s.Do()
 }

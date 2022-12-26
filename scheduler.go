@@ -24,7 +24,6 @@ func (s *Scheduler) Insert(child *concurrency.Executor, parents ...*concurrency.
 }
 
 func (s *Scheduler) Do() {
-	s.wg.Add(len(s.dependencyTree.Place) - 1)
 	walk(s.dependencyTree.Tree, s.wg)
 	s.wg.Wait()
 }
@@ -32,6 +31,7 @@ func (s *Scheduler) Do() {
 func walk(n *internal.Node, wg *sync.WaitGroup) {
 	if n.Executor != nil {
 		executor := *n.Executor
+		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
 			wait(n.Chans)
 			executor.Exec()
