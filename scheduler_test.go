@@ -54,7 +54,7 @@ func (o *a3) Name() string {
 }
 
 func TestInsert(t *testing.T) {
-	s := New()
+	s := NewScheduler()
 	a1 := Newa1()
 	a2 := Newa2()
 	a3 := Newa3()
@@ -64,7 +64,7 @@ func TestInsert(t *testing.T) {
 }
 
 func TestDo(t *testing.T) {
-	s := New()
+	s := NewScheduler()
 	a1 := Newa1()
 	a2 := Newa2()
 	a3 := Newa3()
@@ -73,4 +73,17 @@ func TestDo(t *testing.T) {
 	s.Insert(&a3)
 	s.Insert(&a2, &a3)
 	s.Do()
+}
+
+func TestAtOnceScheduler(t *testing.T) {
+	a := NewAtOnceScheduler()
+	a1 := Newa1()
+	a2 := Newa2()
+	a3 := Newa3()
+
+	a.Insert(&a1)
+	a.Insert(&a2, &a1)
+	a.Insert(&a3)
+	a.Insert(&a2, &a3) // it will be error
+	a.Do()
 }
